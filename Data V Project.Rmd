@@ -1,0 +1,104 @@
+---
+Title: "Farmers Market"
+Name: "Shubham Shendkar"
+Section Number: 01
+---
+# Number of farmers market in each state
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(lubridate)
+
+fmkt <- read.csv(choose.files())
+unique(fmkt$State)
+State_freq <- as.data.frame(table(fmkt$State))
+ggplot(State_freq, aes(x=State_freq$Var1, y=State_freq$Freq)) + geom_bar(stat = "Identity") + xlab("States") + ylab("Frequency") + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + ggtitle("Frequency of Farmer's market across the country") + theme(plot.title = element_text(hjust = 0.5))
+```
+# Preferred media by farmers market
+```{r}
+df <- fmkt %>%
+  group_by(fmkt$Website) %>%
+  dplyr::summarise(Count=n()) %>%
+  drop_na()
+sum(df$Count)
+
+df1 <- fmkt %>%
+  group_by(fmkt$Facebook) %>%
+  dplyr::summarise(Count=n()) %>%
+  drop_na()
+sum(df1$Count)
+
+df2 <- fmkt %>%
+  group_by(fmkt$Twitter) %>%
+  dplyr::summarise(Count=n()) %>%
+  drop_na()
+sum(df2$Count)
+
+df3 <- fmkt %>%
+  group_by(fmkt$Youtube) %>%
+  dplyr::summarise(Count=n()) %>%
+  drop_na()
+sum(df3$Count)
+
+df4 <- fmkt %>%
+  group_by(fmkt$OtherMedia) %>%
+  dplyr::summarise(Count=n()) %>%
+  drop_na()
+sum(df4$Count)
+
+data.1 <- data.frame(Media = c("Website", "Facebook", "Twitter", "Youtube", "Other Media"), Frequency = c(5290, 4175, 1042, 186, 872))
+data.1
+
+ggplot(data.1, aes(x=data.1$Media, y=data.1$Frequency)) + geom_bar(stat = "Identity") + xlab("Online Platform") + ylab("Frequency") + ggtitle("Preferred online platform used by farmer's") + theme(plot.title = element_text(hjust = 0.5))
+```
+# Organic products offered in each state
+```{r}
+geo_organic <- dplyr::summarise(group_by(fmkt, State), organic_offered = sum(Organic == "Y", na.rm = TRUE))
+
+ggplot(geo_organic, aes(x=geo_organic$State, y=geo_organic$organic_offered)) + geom_bar(stat = "Identity") + ggtitle("Number of organic products offered") + ylab(" Number of locations") + xlab("States") +  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + theme(plot.title = element_text(hjust = 0.5))
+```
+# Payment system 
+```{r}
+payment_methods <- data.frame(table(fmkt$Credit), table(fmkt$WIC), table(fmkt$WICcash), table(fmkt$SFMNP), table(fmkt$SNAP))
+
+payment_method <- c("Credit", "WIC", "WICcash", "SFMNP", "SNAP")
+Frequency <- c(payment_methods$Freq[2], payment_methods$Freq.1[2], payment_methods$Freq.2[2], payment_methods$Freq.3[2], payment_methods$Freq.4[2])
+
+pm <- as.data.frame(payment_method, Frequency)
+pm$Frequency <- Frequency
+
+ggplot(data = pm, aes(x = payment_method, y = Frequency)) +
+  geom_col() + xlab("Payment Methods") + ylab("Frequency") + ggtitle("Payment methods used by Farmer's") + theme(plot.title = element_text(hjust = 0.5))
+```
+# Amount granted per state under FMPP
+```{r}
+amount <- data.frame(Total.Project.Amount = c(214, 259, 310, 624, 311, 118, 333, 132, 87, 509, 152, 306, 193, 621, 205, 313, 468, 305, 566, 312, 259, 320, 400, 147, 247, 312, 312, 138, 192, 210, 434, 418), State = c("Alabama","Alaska","Arizona","California","Colorado","Connecticut","Delaware","District of Columbia","Georgia","Hawaii","Illinois","Iowa","Kansas","Kentucky","Maine"," Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Nebraska","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","South Carolina","Texas","Vermont", "Washington", "West Virginia")) 
+amount
+
+ggplot(amount, aes(x=amount$State, y=amount$Total.Project.Amount)) + geom_bar(stat = "Identity") + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("States") + ylab("Total Project Amount (In Thousands)") + ggtitle("Amount granted per state under FMPP") + theme(plot.title = element_text(hjust = 0.5))
+```
+# SNAP Benefits
+```{r}
+SNAP <- data.frame(Years = c(1969, 1970, 1971, 1972, 1973, 1974, 1975, 1976, 1977, 1978, 1979, 1980, 1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019), Benefits = c(229, 550, 1523, 1797, 2131, 2718, 5386, 5327, 5067, 5139, 6480, 8721, 10630, 10208, 11152, 10696, 10744, 10605, 10500, 11149, 11670, 14143, 17316, 20906, 22006, 22749, 22765, 22440, 19549, 19890, 15769, 14983, 15547,18256, 21404, 24619, 28568, 30187, 30373, 34608, 50360, 64702, 71811, 74619, 76066, 69999, 69645, 66539, 63711, 58997, 53758))
+SNAP
+
+ggplot(SNAP, aes(x=SNAP$Years, y=SNAP$Benefits)) + geom_area(stat = "Identity", alpha = 0.4) + geom_point () + xlab("Years") + ylab("Benefits (In Millions)") + ggtitle("Benefits provided per year") + theme(plot.title = element_text(hjust = 0.5))
+```
+# wic vs sfmnp
+```{r}
+df <- data.frame(States = c("Alabama","Alaska", "Arizona", "Arkansas", "California", "Delaware", "District of Columbia", "Florida", "Georgia", "Illinois", "Indiana", "Iowa", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Montana", "Nebraska", "Nevada", "New Jersey", "New Mexico", "New York", "North Carolina", "Ohio", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island", "South Carolina", "Tennessee", "Texas", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin"), Farmers.WIC = c(186, 56, 63, 304, 1026, 258, 7, 63, 178, 61, 453, 681, 1179, 128, 179, 256, 451, 1492, 340, 140, 150, 373, 42, 183, 850, 918, 450, 322, 725, 1160, 67, 64, 231, 103, 164, 243, 194, 622, 335, 1193)) 
+
+df1 <- data.frame(Farmers.SFMNP = c(911,56,63, 179, 1055, 258, 63, 149, 61, 327, 453, 681, 884, 247, 85, 256, 451, 2904, 340, 140, 150, 373, 75, 183, 850, 918, 456, 440, 725, 1160, 67, 86, 231, 103, 28, 243, 194, 677, 314, 1193))  
+
+join <- cbind(df, df1)
+
+ggplot(join, aes(x=join$States, y=join$Farmers.WIC, fill = join$Farmers.SFMNP)) + geom_bar(position = "dodge", stat = "Identity") + xlab("States") + ylab("WIC") + labs(fill="SFMNP") + ggtitle("Farmer's under WIC and SFMNP program across states") + theme(plot.title = element_text(hjust = 0.5)) + theme(axis.text.x = element_text(angle = 90, hjust = 1))  
+```
+# Increase in farmers market along with year
+```{r}
+numbers <- data.frame(Year = c(1994, 1996, 1998, 2000, 2002, 2004, 2006, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019), Farmers.Market = c(1755, 2410, 2746, 2863, 3137, 3706, 4385, 4685, 5274, 6132, 7175, 7864, 8144, 8268, 8476, 8669, 8687, 8720, 8791))
+numbers
+
+ggplot(numbers, aes(x=numbers$Year, y=numbers$Farmers.Market)) + geom_area(stat = "Identity", alpha = 0.4) + geom_point () + xlab("Years") + ylab("Farmers Market") + ggtitle("Number of Farmer's Market with year") + theme(plot.title = element_text(hjust = 0.5))
+```
